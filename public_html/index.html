@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Beadandó - Webfejlesztés 2.</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Bootstrap -->
+        <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.6/sandstone/bootstrap.min.css" rel="stylesheet" integrity="sha256-oqtj+Pkh1c3dgdH6V9qoS7qwhOy2UZfyVK0qGLa9dCc= sha512-izanB/WZ07hzSPmLkdq82m5xS7EH/qDMgl5aWR37EII+rJOi5c6ouJ3PYnrw6K+DWQcnMZ+nO1NqDr6SBKLBDg==" crossorigin="anonymous">
+        <link rel="shortcut icon" type="image/png" href="images/snake.png"/>
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+        <link rel="stylesheet" type="text/css" href="css/mymodal.css">
+    </head>
+    <body>
+
+        <nav class="navbar navbar-default">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">Webfejlesztés 2.</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+
+            <div class="jumbotron">
+                <h1>Beadandó <small>Webfejlesztés 2.</small></h1>
+            </div>
+
+            <h2>7. feladat</h2>
+            <p>Leírás</p>
+            <div class="well">
+                <div class="form-group">
+                    <label for="n">Szélesség:</label>
+                    <input type="number" class="form-control input-sm" id="n" min="3" value="10">
+                    <br>
+                    <label for="m">Magasság:</label>
+                    <input type="number" class="form-control input-sm" id="m" min="3" value="10">
+                    <br>
+                    <label for="k">Tereptárgyak száma:</label>
+                    <input type="number" class="form-control input-sm" id="k" min="0" value="2">
+                    <br>
+                    <button id="generateButton" type="button" class="btn btn-info">Pályakészítés</button>
+                    <button id="startGame" type="button" class="btn btn-success disabled">Start</button>
+                    <button id="stopGame" type="button" class="btn btn-danger disabled">Stop</button>
+
+                </div>
+
+                <table id="gameTable">
+
+                </table>
+
+            </div>
+        </div>
+
+        <!-- The Modal -->
+        <div id="myModal" class="my-modal">
+
+            <!-- Modal content -->
+            <div class="my-modal-content">
+                <div class="my-modal-header">
+                    <span id="closeBtn" class="my-close">×</span>
+                    <h1>Játék vége</h1>
+                </div>
+                <div class="my-modal-body">
+                    <h2 id="modal-message"></h2>
+                </div>
+                <div class="my-modal-footer">
+                    
+                </div>
+            </div>
+
+        </div>
+        
+        <script src="selector.js"></script>
+        <script src="mymodal.js"></script>
+        <script src="game.js"></script>
+    </body>
+</html>
