@@ -42,7 +42,7 @@
                     <br>
                     <button id="generateButton" type="button" class="btn btn-info">Pályakészítés</button>
                     <button id="startGame" type="button" class="btn btn-success disabled">Start</button>
-                    <button id="stopGame" type="button" class="btn btn-danger disabled">Stop</button>
+                    <button id="pauseGame" type="button" class="btn btn-primary disabled">Szünet</button>
 
                 </div>
 
@@ -53,21 +53,19 @@
             </div>
         </div>
 
-        <!-- The Modal -->
         <div id="myModal" class="my-modal">
-
-            <!-- Modal content -->
             <div class="my-modal-content">
                 <div class="my-modal-header">
                     <span id="closeBtn" class="my-close">×</span>
-                    <h1>Játék vége</h1>
+                    <h1 class="text-center">Játék vége</h1>
                 </div>
                 <div class="my-modal-body">
-                    <h2 id="modal-message"></h2>
+                    <h2 id="modal-message" class="text-center"></h2>
+                    <div class="form-group center-block">
+                        <button id="newGame" type="button" class="btn btn-success">Új játék</button>
+                    </div>
                 </div>
-                <div class="my-modal-footer">
-                    
-                </div>
+                <div class="my-modal-footer"></div>
             </div>
 
         </div>
