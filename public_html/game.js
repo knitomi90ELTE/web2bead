@@ -1,33 +1,34 @@
 window.addEventListener('load', init, false);
 
-
 var CONSTANTS = {
     DEFAULT_ROW_COUNT : 10,
     DEFAULT_COL_COUNT : 10,
     DEFAULT_OBS_COUNT : 2,
     BASE_INTERVAL : 400,
-    OBSTACLE_IMAGE : ''
-};
-
-var gameRunning = null;
-var colCount;
-var rowCount;
-var obsCount;
-var tukrokTekercse = false;
-var runnningInterval = CONSTANTS.BASE_INTERVAL;
-var score = 1;
-var round = 1;
-var snakeCells = [
-    {
-        x: 0,
+    OBSTACLE_IMAGE : '',
+    SNAKE_START : {
+        x :0,
         y: 0
     }
-];
+};
 
-var obstacles = [];
-var tekercsPosition;
+var game = {
+    running : null,
+    logging : false,
+    round : 1,
+    score : 1,
+    runnningInterval : CONSTANTS.BASE_INTERVAL
+};
 
-var direction = 0;
+var table = {
+    tekercs : null,
+    obstacles : []
+};
+
+var snake = {
+    direction : 0,
+    cells : []
+};
 /*
  0 -> jobbra
  1 -> fel
@@ -35,23 +36,29 @@ var direction = 0;
  3 -> le
  */
 
+var colCount;
+var rowCount;
+var obsCount;
+
+var tukrokTekercse = false;
+
 document.onkeydown = function (e) {
     switch (e.keyCode) {
         case 37:
-            console.log('left');
-            direction = tukrokTekercse ? 0 : 2;
+            if(game.logging) console.log('left');
+            snake.direction = tukrokTekercse ? 0 : 2;
             break;
         case 38:
-            console.log('up');
-            direction = tukrokTekercse ? 3 : 1;
+            if(game.logging) console.log('up');
+            snake.direction = tukrokTekercse ? 3 : 1;
             break;
         case 39:
-            console.log('right');
-            direction = tukrokTekercse ? 2 : 0;
+            if(game.logging) console.log('right');
+            snake.direction = tukrokTekercse ? 2 : 0;
             break;
         case 40:
-            console.log('down');
-            direction = tukrokTekercse ? 1 : 3;
+            if(game.logging) console.log('down');
+            snake.direction = tukrokTekercse ? 1 : 3;
             break;
     }
 };
@@ -65,42 +72,53 @@ function init() {
 
 function getRandomCell(){
     var coord = {
-        x : Math.floor(Math.random() * rowCount) + 1,
-        y : Math.floor(Math.random() * colCount) + 1
+        x : Math.floor(Math.random() * rowCount),
+        y : Math.floor(Math.random() * colCount)
     };
-    return (snakeCells.indexOf(coord) !== -1 || obstacles.indexOf(coord) !== 1) ? coord : getRandomCell();
+    return (!isSnake(coord) || !isObstacle(coord)) ? coord : getRandomCell();
 }
 
 function getColumn(x, y) {
-    console.log('getColumn',x, y, round);
+    if(game.logging) console.log('getColumn',x, y, game.round);
     return $('#gameTable').rows[x].cells[y];
 }
 
+function changeColumnColor(cell, color){
+    try{
+        getColumn(cell.x, cell.y).style.backgroundColor = color;
+    }catch (e){
+        if(game.logging) console.log('Nincs ilyen cella');
+    }
+}
+
 function colorColumn(cell) {
-    console.log('colorColumn',cell.x, cell.y, round);
-    getColumn(cell.x, cell.y).style.backgroundColor = 'red';
+    if(game.logging) console.log('colorColumn',cell.x, cell.y, game.round);
+    changeColumnColor(cell, 'red');
 }
 
 function removeSnakeCell(cell) {
-    console.log('removeSnakeCell',cell.x, cell.y, round);
-    getColumn(cell.x, cell.y).style.backgroundColor = '';
+    if(game.logging) console.log('removeSnakeCell',cell.x, cell.y, game.round);
+    changeColumnColor(cell, '');
 }
 
 function drawSnake() {
-    console.log('drawSnake',round);
-    snakeCells.forEach(colorColumn);
+    if(game.logging) console.log('drawSnake',game.round);
+    snake.cells.forEach(colorColumn);
 }
 
 function initSnake() {
-    console.log('initSnake',round);
-    snakeCells.forEach(colorColumn);
+    if(game.logging) console.log('initSnake',game.round);
+    snake.cells = [CONSTANTS.SNAKE_START];
+    snake.cells.forEach(colorColumn);
 }
 
 function initObstacles(){
     var k = $('#k').value;
     for(var i = 0; i < k; i++){
         var coord = getRandomCell();
-        //getColumn(coord.x, coord.y).style.backgroundImage
+        table.obstacles.push(coord);
+        if(game.logging) console.log('Obstacle at ', coord.x, coord.y);
+        getColumn(coord.x, coord.y).innerHTML = '<img src="images/obstacle.png" class="obstacle">';
     }
 }
 
@@ -112,10 +130,12 @@ function resetData() {
     $('#n').value = CONSTANTS.DEFAULT_COL_COUNT;
     $('#m').value = CONSTANTS.DEFAULT_ROW_COUNT;
     $('#k').value = CONSTANTS.DEFAULT_OBS_COUNT;
-    runnningInterval = CONSTANTS.BASE_INTERVAL;
-    gameRunning = null;
+    game.runnningInterval = CONSTANTS.BASE_INTERVAL;
+    game.running = null;
+    game.score = 1;
+    snake.cells = [CONSTANTS.SNAKE_START];
+    table.obstacles = [];
     tukrokTekercse = false;
-    score = 1;
     clearTable();
     hideMyModal();
 }
@@ -126,12 +146,12 @@ function gameOver() {
 }
 
 function startGame() {
-    gameRunning = setInterval(moveSnake, runnningInterval);
+    game.running = setInterval(moveSnake, game.runnningInterval);
 }
 
 function pauseGame() {
-    if (gameRunning) {
-        clearInterval(gameRunning);
+    if (game.running) {
+        clearInterval(game.running);
     }
 }
 
@@ -166,35 +186,90 @@ function generateHtml() {
     return tableHtml;
 }
 
-function moveSnake() {
-    console.log('moveSnake',round);
-    var lastIndex = snakeCells.length - 1;
+function getNewSnakePosition(){
+    var lastIndex = snake.cells.length - 1;
     var tmp;
-    switch (direction) {
+    switch (snake.direction) {
         case 0:
-            tmp = {x: snakeCells[lastIndex].x, y: snakeCells[lastIndex].y + 1};
+            tmp = {x: snake.cells[lastIndex].x, y: snake.cells[lastIndex].y + 1};
             break;
         case 1:
-            tmp = {x: snakeCells[lastIndex].x - 1, y: snakeCells[lastIndex].y};
+            tmp = {x: snake.cells[lastIndex].x - 1, y: snake.cells[lastIndex].y};
             break;
         case 2:
-            tmp = {x: snakeCells[lastIndex].x, y: snakeCells[lastIndex].y - 1};
+            tmp = {x: snake.cells[lastIndex].x, y: snake.cells[lastIndex].y - 1};
             break;
         case 3:
-            tmp = {x: snakeCells[lastIndex].x + 1, y: snakeCells[lastIndex].y};
+            tmp = {x: snake.cells[lastIndex].x + 1, y: snake.cells[lastIndex].y};
             break;
     }
+    return tmp;
+}
 
-    if (tmp.x < 0 || tmp.x > colCount || tmp.y < 0 || tmp.y > rowCount) {
-        console.log('outOfBounds',round);
+function moveSnake() {
+    if(game.logging) console.log('moveSnake',game.round);
+    var newPos = getNewSnakePosition();
+    if (isPlaceNotOk(newPos)) {
+        if(game.logging) console.log('outOfBounds',game.round);
         gameOver();
         return;
     }
-    removeSnakeCell(snakeCells[0]);
-    snakeCells.shift();
-    snakeCells.push(tmp);
+    removeSnakeCell(snake.cells[0]);
+    snake.cells.shift();
+    snake.cells.push(newPos);
     drawSnake();
-    round++;
+    game.round++;
 }
 
+function isPlaceNotOk(coord){
+    return isObstacle(coord) || isOut(coord);
+}
 
+function isOut(coord){
+    return coord.x < 0 || coord.x > colCount || coord.y < 0 || coord.y > rowCount;
+}
+
+function isObstacle(coord){
+    /*var isObs = false;
+    table.obstacles.map(function(o){
+        console.log(o);
+        if(coord.x === o.x && coord.y === o.y) {
+            isObs = true;
+            return;
+        };
+    });
+    return isObs;*/
+    return table.obstacles.indexOfObject(coord);
+}
+
+function isSnake(coord){
+    /*var isSnk = false;
+    snake.cells.map(function(o){
+        console.log(o);
+        if(coord.x === o.x && coord.y === o.y) {
+            isSnk = true;
+            return;
+        };
+    });
+    return isSnk;*/
+    return snake.cells.indexOfObject(coord);
+}
+
+Array.prototype.indexOfObject = function(obj){
+    var index = -1;
+    for(var i = 0; i < this.length; i++){
+        var objKeys = Object.keys(obj);
+        var itmKeys = Object.keys(this[i]);
+        var match = true;
+        for(var j = 0; j < itmKeys.length; j++){
+            var objKey = objKeys[j];
+            var itmKey = itmKeys[j];
+            if(this[i][itmKey] !== obj[objKey]){
+                match = false;
+                break;
+            }
+        }
+        if(match) index = i;
+    }
+    return index;
+};

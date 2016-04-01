@@ -4,6 +4,12 @@
     border: 1px solid black;
 }
 
+.obstacle {
+    height: 27px;
+    width: 27px;
+    padding: 3px
+}
+
 .my-modal-dialog {
     position: absolute;
     height: auto;
