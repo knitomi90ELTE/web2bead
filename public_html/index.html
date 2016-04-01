@@ -4,7 +4,6 @@
         <meta charset="utf-8">
         <title>Beadandó - Webfejlesztés 2.</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- Bootstrap -->
         <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.6/sandstone/bootstrap.min.css" rel="stylesheet" integrity="sha256-oqtj+Pkh1c3dgdH6V9qoS7qwhOy2UZfyVK0qGLa9dCc= sha512-izanB/WZ07hzSPmLkdq82m5xS7EH/qDMgl5aWR37EII+rJOi5c6ouJ3PYnrw6K+DWQcnMZ+nO1NqDr6SBKLBDg==" crossorigin="anonymous">
         <link rel="shortcut icon" type="image/png" href="images/snake.png"/>
         <link rel="stylesheet" type="text/css" href="css/style.css">
@@ -12,7 +11,6 @@
         <link rel="stylesheet" type="text/css" href="css/mymodal.css">
     </head>
     <body>
-
         <nav class="navbar navbar-default">
             <div class="container">
                 <div class="navbar-header">
@@ -20,13 +18,7 @@
                 </div>
             </div>
         </nav>
-
         <div class="container">
-
-            <!--div class="jumbotron">
-                <h1>Beadandó <small>Webfejlesztés 2.</small></h1>
-            </div-->
-
             <div class="well">
                 <div class="form-group">
                     <label for="n">Szélesség:</label>
@@ -41,20 +33,21 @@
                     <button id="generateButton" type="button" class="btn btn-info">Pályakészítés</button>
                     <button id="startGame" type="button" class="btn btn-success disabled">Start</button>
                     <button id="pauseGame" type="button" class="btn btn-primary disabled">Szünet</button>
-
                 </div>
-
+                <div class="form-group">
+                    <p class="lead" id="score">Score: </p>
+                    <p class="lead" id="scroll">Aktív tekercs: </p>
+                </div>
                 <table id="gameTable">
 
                 </table>
-
             </div>
         </div>
 
         <div id="myModal" class="my-modal">
             <div class="my-modal-content">
                 <div class="my-modal-header">
-                    <span id="closeBtn" class="my-close">×</span>
+                    <!--span id="closeBtn" class="my-close">×</span-->
                     <h1 class="text-center">Játék vége</h1>
                 </div>
                 <div class="my-modal-body">
@@ -65,9 +58,8 @@
                 </div>
                 <div class="my-modal-footer"></div>
             </div>
-
         </div>
-        
+
         <script src="selector.js"></script>
         <script src="mymodal.js"></script>
         <script src="game.js"></script>
