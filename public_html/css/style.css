@@ -1,13 +1,24 @@
 .cell {
     height: 30px;
     width: 30px;
+    border: none;
+}
+
+#gameTable {
     border: 1px solid black;
+    background-color: #8EB367;
 }
 
 .sm-img {
     height: 27px;
     width: 27px;
     padding: 3px
+}
+
+.snake-body {
+    height: 29px;
+    width: 29px;
+    padding: 1px;
 }
 
 .my-modal-dialog {
@@ -17,4 +28,8 @@
     padding: 20px;
     border: 1px solid black;
     background-color: #269abc;
+}
+
+.light-green {
+    background-color: #AECE8B !important;
 }
