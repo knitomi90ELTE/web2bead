@@ -20,6 +20,14 @@
         </nav>
         <div class="container">
             <div class="well">
+                <h1>Beadandó - Webfejlesztés 2.</h1>
+                <h2>Help</h2>
+                <p class="text-info">Bölcsesség tekercse (kék): a sárkány 4 egységgel növekszik tőle.</p>
+                <p class="text-info">Tükrök tekercse (szürke): az irányítás tükörképben történik irányonként (fel helyett le, bal helyett jobb).</p>
+                <p class="text-info">Fordítás tekercse (zöld): a sárkány haladási iránya megfordul (feje és farka helyett cserél). - Helytelen működés!</p>
+                <p class="text-info">Mohóság tekercse (lila): a sárkány haladási sebessége másfélszeresére nő 5 másodpercig.</p>
+                <p class="text-info">Lustaság tekercse (sárga): a sárkány haladási sebessége másfélszeresére csökken 5 másodpercig.</p>
+                <p class="text-info">Falánkság tekercse (piros): a sárkány 10 egységgel növekszik tőle.</p>
                 <div class="form-group">
                     <label for="n">Szélesség:</label>
                     <input type="number" class="form-control input-sm" id="n" min="3" value="10">
@@ -31,11 +39,11 @@
                     <input type="number" class="form-control input-sm" id="k" min="0" value="2">
                     <br>
                     <button id="generateButton" type="button" class="btn btn-info">Pályakészítés</button>
-                    <button id="startGame" type="button" class="btn btn-success disabled">Start</button>
-                    <button id="pauseGame" type="button" class="btn btn-primary disabled">Szünet</button>
+                    <button id="startGame" type="button" class="btn btn-success">Start</button>
+                    <button id="pauseGame" type="button" class="btn btn-primary">Szünet</button>
                 </div>
                 <div class="form-group">
-                    <p class="lead" id="score">Score: 0</p>
+                    <p class="lead" id="score">Score: 1</p>
                     <p class="lead" id="scroll">Aktív tekercs: nincs</p>
                 </div>
                 <div class="well light-green">

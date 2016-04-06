@@ -4,42 +4,41 @@ var CONSTANTS = {
     DEFAULT_ROW_COUNT: 10,
     DEFAULT_COL_COUNT: 10,
     DEFAULT_OBS_COUNT: 2,
-    BASE_INTERVAL: 400,
     SNAKE_START: {
         x: 0,
         y: 0
+    },
+    DEFAULT_SNAKE: {
+        direction: 0,
+        cells: [],
+        extending: 0
+    },
+    DEFAULT_GAME: {
+        running: null,
+        score: 1,
+        runnningInterval: 400
+    },
+    DEFAULT_TABLE: {
+        scrollOnTable: {
+            type: null,
+            position: null
+        },
+        obstacles: [],
+        mirrorEffect: false,
+        reverseEffect: false
     }
 };
 
-var game = {
-    running: null,
-    logging: false,
-    round: 1,
-    score: 1,
-    runnningInterval: CONSTANTS.BASE_INTERVAL
-};
-
-var table = {
-    scrollOnTable: {
-        type: null,
-        position: null
-    },
-    obstacles: [],
-    mirrorEffect: false,
-    reverseEffect: false
-};
-
+var game = CONSTANTS.DEFAULT_GAME;
+var table = CONSTANTS.DEFAULT_TABLE;
+var snake = CONSTANTS.DEFAULT_SNAKE;
 var formData = {
     colCount: null,
     rowCount: null,
     obsCount: null
 };
 
-var snake = {
-    direction: 0,
-    cells: [],
-    extending: 0
-};
+
 /*
  0 -> jobbra
  1 -> fel
@@ -58,8 +57,6 @@ var scrolls = {
     wisdom: {//kék
         name: 'Bölcsesség tekercse',
         execute: function () {
-            if (game.logging)
-                console.log('Executing ' + this.name);
             extendSnake(4);
         },
         hasEffect: false
@@ -67,8 +64,6 @@ var scrolls = {
     mirror: {//szürke
         name: 'Tükrök tekercse',
         execute: function () {
-            if (game.logging)
-                console.log('Executing ' + this.name);
             $('#scroll').innerHTML = 'Aktív tekercs: ' + this.name;
             table.mirrorEffect = true;
         },
@@ -77,37 +72,18 @@ var scrolls = {
     reverse: {//zöld
         name: 'Fordítás tekercse',
         execute: function () {
-            if (game.logging)
-                console.log('Executing ' + this.name);
             pauseGame();
             snake.cells.reverse();
-            var tmp = snake.cells[snake.cells.length - 1];
-            calculateDirection(tmp);
+            calculateDirection(snake.cells[snake.cells.length - 1]);
+            table.reverseEffect = true;
             startGame();
-            /*
-             switch (snake.direction) {
-             case 0:
-             snake.direction = 2;
-             break;
-             case 1:
-             snake.direction = 3;
-             break;
-             case 2:
-             snake.direction = 0;
-             break;
-             case 3:
-             snake.direction = 1;
-             break;
-             }*/
-            $('#scroll').innerHTML = 'Aktív tekercs: ' + this.name;
+            $('#scroll').innerHTML = 'Aktív tekercs: ' + this.name + ' (nem működik)';
         },
         hasEffect: false
     },
     greedy: {//lila
         name: 'Mohóság tekercse',
         execute: function () {
-            if (game.logging)
-                console.log('Executing ' + this.name);
             game.runnningInterval /= 1.5;
             pauseGame();
             startGame();
@@ -119,8 +95,6 @@ var scrolls = {
     lazy: {//sárga
         name: 'Lustaság tekercse',
         execute: function () {
-            if (game.logging)
-                console.log('Executing ' + this.name);
             game.runnningInterval *= 1.5;
             pauseGame();
             startGame();
@@ -132,57 +106,49 @@ var scrolls = {
     voracious: {//piros
         name: 'Falánkság tekercse',
         execute: function () {
-            if (game.logging)
-                console.log('Executing ' + this.name);
             extendSnake(10);
         },
         hasEffect: false
     }
 };
 
+var directions = {
+    keyCodes: [37, 38, 39, 40],
+    39: {//jobbra
+        true: 2,
+        false: 0
+    },
+    38: {//fel
+        true: 3,
+        false: 1
+    },
+    37: {//bal
+        true: 0,
+        false: 2
+    },
+    40: {//le
+        true: 1,
+        false: 3
+    }
+};
 document.onkeydown = function (e) {
-
-    switch (e.keyCode) {
-        case 37:
-            e.preventDefault();
-            if (game.logging)
-                console.log('left');
-            snake.direction = table.mirrorEffect ? 0 : 2;
-            break;
-        case 38:
-            e.preventDefault();
-            if (game.logging)
-                console.log('up');
-            snake.direction = table.mirrorEffect ? 3 : 1;
-            break;
-        case 39:
-            e.preventDefault();
-            if (game.logging)
-                console.log('right');
-            snake.direction = table.mirrorEffect ? 2 : 0;
-            break;
-        case 40:
-            e.preventDefault();
-            if (game.logging)
-                console.log('down');
-            snake.direction = table.mirrorEffect ? 1 : 3;
-            break;
+    if (directions.keyCodes.indexOf(e.keyCode) !== -1) {
+        e.preventDefault();
+        snake.direction = directions[e.keyCode][table.mirrorEffect];
     }
 };
 
 function calculateDirection(cell) {
-    console.log("calculateDirection");
     var neighbourCells = [
-        {x: cell.x + 1, y: cell.y, dir: 2},
-        {x: cell.x - 1, y: cell.y, dir: 0},
-        {x: cell.x, y: cell.y + 1, dir: 1},
-        {x: cell.x, y: cell.y - 1, dir: 3}
+        {x: cell.x + 1, y: cell.y, dir: 1},
+        {x: cell.x - 1, y: cell.y, dir: 3},
+        {x: cell.x, y: cell.y + 1, dir: 2},
+        {x: cell.x, y: cell.y - 1, dir: 0}
     ];
 
-    for (cell in neighbourCells) {
-        if (snake.cells.indexOfObject({x: cell.x, y: cell.y}) !== -1) {
-            snake.direction = cell.dir;
-            console.log("newdirfound");
+    for (var i = 0; i < neighbourCells.length; i++) {
+        if (snake.cells.indexOfObject({x: neighbourCells[i].x, y: neighbourCells[i].y}) !== -1) {
+            snake.direction = neighbourCells[i].dir;
             break;
         }
     }
@@ -204,31 +170,18 @@ function getRandomCell() {
 }
 
 function getColumn(x, y) {
-    if (game.logging)
-        console.log('getColumn', x, y, game.round);
     return $('#gameTable').rows[x].cells[y];
 }
 
 function changeColumnColor(cell, color) {
-    try {
-        getColumn(cell.x, cell.y).style.backgroundColor = color;
-    } catch (e) {
-        if (game.logging)
-            console.log('Nincs ilyen cella');
-    }
+    getColumn(cell.x, cell.y).style.backgroundColor = color;
 }
 
 function colorColumn(cell) {
-    if (game.logging)
-        console.log('colorColumn', cell.x, cell.y, game.round);
-    //changeColumnColor(cell, '#36381B');
     getColumn(cell.x, cell.y).innerHTML = '<img src="images/body.png" class="snake-body">';
 }
 
 function removeSnakeCell(cell) {
-    if (game.logging)
-        console.log('removeSnakeCell', cell.x, cell.y, game.round);
-    //changeColumnColor(cell, '');
     getColumn(cell.x, cell.y).innerHTML = '';
 }
 
@@ -239,29 +192,25 @@ function extendSnake(value) {
 }
 
 function drawSnake() {
-    if (game.logging)
-        console.log('drawSnake', game.round);
     snake.cells.forEach(colorColumn);
+    if (table.reverseEffect) {
+        table.reverseEffect = false;
+        return;
+    }
     var head = snake.cells[snake.cells.length - 1];
     getColumn(head.x, head.y).innerHTML = '<img src="images/head_' + snake.direction + '.png" class="snake-body">';
 }
 
 function initSnake() {
-    if (game.logging)
-        console.log('initSnake', game.round);
     snake.cells = [CONSTANTS.SNAKE_START];
     var head = snake.cells[snake.cells.length - 1];
     getColumn(head.x, head.y).innerHTML = '<img src="images/head_' + snake.direction + '.png" class="snake-body">';
-
 }
 
 function initObstacles() {
-    //var k = $('#k').value;
     for (var i = 0; i < formData.obsCount; i++) {
         var coord = getRandomCell();
         table.obstacles.push(coord);
-        if (game.logging)
-            console.log('Obstacle at ', coord.x, coord.y);
         getColumn(coord.x, coord.y).innerHTML = '<img src="images/obstacle.png" class="sm-img">';
     }
 }
@@ -276,32 +225,32 @@ function initObstacles() {
  */
 var first = true;
 function getScroll() {
-    /*var x = Math.floor(Math.random() * 100);
-     if (x < 80) {
-     return 'wisdom';
-     } else if (x < 84) {
-     return 'mirror';
-     } else if (x < 88) {
-     return 'reverse';
-     } else if (x < 92) {
-     return 'greedy';
-     } else if (x < 96) {
-     return 'lazy';
-     } else {
-     return 'voracious';
-     }*/
-    if (first) {
-        first = false;
+    var x = Math.floor(Math.random() * 100);
+    if (x < 80) {
         return 'wisdom';
-    } else {
+    } else if (x < 84) {
+        return 'mirror';
+    } else if (x < 88) {
         return 'reverse';
-    }
+    } else if (x < 92) {
+        return 'greedy';
+    } else if (x < 96) {
+        return 'lazy';
+    } else {
+        return 'voracious';
+    }/*
+     if (first) {
+     first = false;
+     return 'wisdom';
+     } else {
+     return 'reverse';
+     }*/
 }
 
 function removeScrollEffects() {
     table.mirrorEffect = false;
-    if (game.runnningInterval !== CONSTANTS.BASE_INTERVAL) {
-        game.runnningInterval = CONSTANTS.BASE_INTERVAL;
+    if (game.runnningInterval !== CONSTANTS.DEFAULT_GAME.runnningInterval) {
+        game.runnningInterval = CONSTANTS.DEFAULT_GAME.runnningInterval;
         pauseGame();
         startGame();
     }
@@ -332,13 +281,9 @@ function resetData() {
     $('#n').value = CONSTANTS.DEFAULT_COL_COUNT;
     $('#m').value = CONSTANTS.DEFAULT_ROW_COUNT;
     $('#k').value = CONSTANTS.DEFAULT_OBS_COUNT;
-    game.runnningInterval = CONSTANTS.BASE_INTERVAL;
-    game.running = null;
-    game.score = 1;
-    snake.cells = [CONSTANTS.SNAKE_START];
-    snake.direction = 0;
-    table.obstacles = [];
-    table.mirrorEffect = false;
+    game = CONSTANTS.DEFAULT_GAME;
+    table = CONSTANTS.DEFAULT_TABLE;
+    snake = CONSTANTS.DEFAULT_SNAKE;
     updateScoreLabel();
     clearTable();
     hideMyModal();
@@ -350,19 +295,23 @@ function gameOver() {
 }
 
 function startGame() {
-    game.running = setInterval(moveSnake, game.runnningInterval);
+    if (!game.running) {
+        console.log("startGame");
+        game.running = setInterval(moveSnake, game.runnningInterval);
+    }
 }
 
 function pauseGame() {
     if (game.running) {
+        console.log("pauseGame");
         clearInterval(game.running);
+        game.running = null;
     }
 }
 
-
-
 function resetRunningInterval() {
-    game.runnningInterval = CONSTANTS.BASE_INTERVAL;
+    console.log("resetRunningInterval");
+    game.runnningInterval = CONSTANTS.DEFAULT_GAME.runnningInterval;
     pauseGame();
     startGame();
 }
@@ -370,32 +319,34 @@ function resetRunningInterval() {
 function updateScoreLabel() {
     $('#score').innerHTML = 'Score: ' + game.score;
 }
-
-function disableButtons() {
-    $('#startGame').classList.add("disabled");
-    $('#pauseGame').classList.add("disabled");
-}
-
-function enableButtons() {
-    $('#startGame').classList.remove("disabled");
-    $('#pauseGame').classList.remove("disabled");
-}
-
+/*
+ function disableButtons() {
+ $('#startGame').classList.add("disabled");
+ $('#pauseGame').classList.add("disabled");
+ }
+ 
+ function enableButtons() {
+ $('#startGame').classList.remove("disabled");
+ $('#pauseGame').classList.remove("disabled");
+ }
+ */
 function generateTable() {
 
-    formData.colCount = $('#n').value;
-    formData.rowCount = $('#m').value;
-    formData.obsCount = $('#k').value;
-    if (formData.colCount < 3 || formData.rowCount < 3) {
-        return;
+    if (!game.running) {
+        formData.colCount = $('#n').value;
+        formData.rowCount = $('#m').value;
+        formData.obsCount = $('#k').value;
+        if (formData.colCount < 3 || formData.rowCount < 3) {
+            return;
+        }
+        resetData();
+        $('#gameTable').innerHTML = generateHtml();
+        initSnake();
+        initObstacles();
+        placeScroll();
+        updateScoreLabel();
+        //enableButtons();
     }
-    resetData();
-    $('#gameTable').innerHTML = generateHtml();
-    initSnake();
-    initObstacles();
-    placeScroll();
-    updateScoreLabel();
-    enableButtons();
 }
 
 function generateHtml() {
@@ -431,12 +382,8 @@ function getNewSnakePosition() {
 }
 
 function moveSnake() {
-    if (game.logging)
-        console.log('moveSnake', game.round);
     var newPos = getNewSnakePosition();
     if (isPlaceNotOk(newPos)) {
-        if (game.logging)
-            console.log('outOfBounds', game.round);
         gameOver();
         return;
     }
@@ -452,7 +399,6 @@ function moveSnake() {
     snake.extending--;
     snake.cells.push(newPos);
     drawSnake();
-    game.round++;
 }
 
 function isPlaceNotOk(coord) {
