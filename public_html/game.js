@@ -79,20 +79,26 @@ var scrolls = {
         execute: function () {
             if (game.logging)
                 console.log('Executing ' + this.name);
-            switch (snake.direction) {
-                case 0:
-                    snake.direction = 2;
-                    break;
-                case 1:
-                    snake.direction = 3;
-                    break;
-                case 2:
-                    snake.direction = 0;
-                    break;
-                case 3:
-                    snake.direction = 1;
-                    break;
-            }
+            pauseGame();
+            snake.cells.reverse();
+            var tmp = snake.cells[snake.cells.length - 1];
+            calculateDirection(tmp);
+            startGame();
+            /*
+             switch (snake.direction) {
+             case 0:
+             snake.direction = 2;
+             break;
+             case 1:
+             snake.direction = 3;
+             break;
+             case 2:
+             snake.direction = 0;
+             break;
+             case 3:
+             snake.direction = 1;
+             break;
+             }*/
             $('#scroll').innerHTML = 'Aktív tekercs: ' + this.name;
         },
         hasEffect: false
@@ -135,29 +141,52 @@ var scrolls = {
 };
 
 document.onkeydown = function (e) {
+
     switch (e.keyCode) {
         case 37:
+            e.preventDefault();
             if (game.logging)
                 console.log('left');
             snake.direction = table.mirrorEffect ? 0 : 2;
             break;
         case 38:
+            e.preventDefault();
             if (game.logging)
                 console.log('up');
             snake.direction = table.mirrorEffect ? 3 : 1;
             break;
         case 39:
+            e.preventDefault();
             if (game.logging)
                 console.log('right');
             snake.direction = table.mirrorEffect ? 2 : 0;
             break;
         case 40:
+            e.preventDefault();
             if (game.logging)
                 console.log('down');
             snake.direction = table.mirrorEffect ? 1 : 3;
             break;
     }
 };
+
+function calculateDirection(cell) {
+    console.log("calculateDirection");
+    var neighbourCells = [
+        {x: cell.x + 1, y: cell.y, dir: 2},
+        {x: cell.x - 1, y: cell.y, dir: 0},
+        {x: cell.x, y: cell.y + 1, dir: 1},
+        {x: cell.x, y: cell.y - 1, dir: 3}
+    ];
+
+    for (cell in neighbourCells) {
+        if (snake.cells.indexOfObject({x: cell.x, y: cell.y}) !== -1) {
+            snake.direction = cell.dir;
+            console.log("newdirfound");
+            break;
+        }
+    }
+}
 
 function init() {
     $('#startGame').addEventListener('click', startGame, false);
@@ -213,18 +242,22 @@ function drawSnake() {
     if (game.logging)
         console.log('drawSnake', game.round);
     snake.cells.forEach(colorColumn);
+    var head = snake.cells[snake.cells.length - 1];
+    getColumn(head.x, head.y).innerHTML = '<img src="images/head_' + snake.direction + '.png" class="snake-body">';
 }
 
 function initSnake() {
     if (game.logging)
         console.log('initSnake', game.round);
     snake.cells = [CONSTANTS.SNAKE_START];
-    snake.cells.forEach(colorColumn);
+    var head = snake.cells[snake.cells.length - 1];
+    getColumn(head.x, head.y).innerHTML = '<img src="images/head_' + snake.direction + '.png" class="snake-body">';
+
 }
 
 function initObstacles() {
-    var k = $('#k').value;
-    for (var i = 0; i < k; i++) {
+    //var k = $('#k').value;
+    for (var i = 0; i < formData.obsCount; i++) {
         var coord = getRandomCell();
         table.obstacles.push(coord);
         if (game.logging)
@@ -241,20 +274,27 @@ function initObstacles() {
  92-95
  96-99
  */
+var first = true;
 function getScroll() {
-    var x = Math.floor(Math.random() * 100);
-    if (x < 80) {
+    /*var x = Math.floor(Math.random() * 100);
+     if (x < 80) {
+     return 'wisdom';
+     } else if (x < 84) {
+     return 'mirror';
+     } else if (x < 88) {
+     return 'reverse';
+     } else if (x < 92) {
+     return 'greedy';
+     } else if (x < 96) {
+     return 'lazy';
+     } else {
+     return 'voracious';
+     }*/
+    if (first) {
+        first = false;
         return 'wisdom';
-    } else if (x < 84) {
-        return 'mirror';
-    } else if (x < 88) {
-        return 'reverse';
-    } else if (x < 92) {
-        return 'greedy';
-    } else if (x < 96) {
-        return 'lazy';
     } else {
-        return 'voracious';
+        return 'reverse';
     }
 }
 
@@ -296,6 +336,7 @@ function resetData() {
     game.running = null;
     game.score = 1;
     snake.cells = [CONSTANTS.SNAKE_START];
+    snake.direction = 0;
     table.obstacles = [];
     table.mirrorEffect = false;
     updateScoreLabel();
@@ -318,6 +359,8 @@ function pauseGame() {
     }
 }
 
+
+
 function resetRunningInterval() {
     game.runnningInterval = CONSTANTS.BASE_INTERVAL;
     pauseGame();
@@ -339,12 +382,14 @@ function enableButtons() {
 }
 
 function generateTable() {
+
     formData.colCount = $('#n').value;
     formData.rowCount = $('#m').value;
+    formData.obsCount = $('#k').value;
     if (formData.colCount < 3 || formData.rowCount < 3) {
         return;
     }
-    clearTable();
+    resetData();
     $('#gameTable').innerHTML = generateHtml();
     initSnake();
     initObstacles();
@@ -411,7 +456,7 @@ function moveSnake() {
 }
 
 function isPlaceNotOk(coord) {
-    return isObstacle(coord) || isOut(coord) /*|| isSnake(coord)*/;
+    return isObstacle(coord) || isOut(coord) || isSnake(coord);
 }
 
 function isOut(coord) {
@@ -448,10 +493,10 @@ Object.prototype.isTheSameObject = function (obj) {
 Array.prototype.indexOfObject = function (obj) {
     var index = -1;
     for (var i = 0; i < this.length; i++) {
-        if (obj.isTheSameObject(this[i])){
+        if (obj.isTheSameObject(this[i])) {
             index = i;
             break;
-        }      
+        }
     }
     return index;
 };
