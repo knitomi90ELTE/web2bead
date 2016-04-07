@@ -1,37 +1,57 @@
 window.addEventListener('load', init, false);
-
-var CONSTANTS = {
-    DEFAULT_ROW_COUNT: 10,
-    DEFAULT_COL_COUNT: 10,
-    DEFAULT_OBS_COUNT: 2,
-    SNAKE_START: {
-        x: 0,
-        y: 0
-    },
-    DEFAULT_SNAKE: {
-        direction: 0,
-        cells: [],
-        extending: 0
-    },
-    DEFAULT_GAME: {
-        running: null,
-        score: 1,
-        runnningInterval: 400
-    },
-    DEFAULT_TABLE: {
-        scrollOnTable: {
-            type: null,
-            position: null
-        },
-        obstacles: [],
-        mirrorEffect: false,
-        reverseEffect: false
-    }
+/*
+ var CONSTANTS = {
+ DEFAULT_ROW_COUNT: 10,
+ DEFAULT_COL_COUNT: 10,
+ DEFAULT_OBS_COUNT: 2,
+ SNAKE_START: {
+ x: 0,
+ y: 0
+ },
+ DEFAULT_SNAKE: {
+ direction: 0,
+ cells: [],
+ extending: 0
+ },
+ DEFAULT_GAME: {
+ running: null,
+ score: 1,
+ runnningInterval: 400
+ },
+ DEFAULT_TABLE: {
+ scrollOnTable: {
+ type: null,
+ position: null
+ },
+ obstacles: [],
+ mirrorEffect: false,
+ reverseEffect: false
+ }
+ };
+ */
+var game = {
+    running: null,
+    score: 1,
+    runnningInterval: 400,
+    initialized: false
 };
 
-var game = CONSTANTS.DEFAULT_GAME;
-var table = CONSTANTS.DEFAULT_TABLE;
-var snake = CONSTANTS.DEFAULT_SNAKE;
+var table = {
+    scrollOnTable: {
+        type: null,
+        position: null
+    },
+    obstacles: [],
+    mirrorEffect: false,
+    reverseEffect: false
+};
+
+var snake = {
+    direction: 0,
+    cells: [],
+    extending: 0
+};
+
 var formData = {
     colCount: null,
     rowCount: null,
@@ -134,9 +154,18 @@ var directions = {
 document.onkeydown = function (e) {
     if (directions.keyCodes.indexOf(e.keyCode) !== -1) {
         e.preventDefault();
+        
+        if(isTheOppositeDirection(e.keyCode) && snake.cells.length > 1){
+            return;
+        }
+        
         snake.direction = directions[e.keyCode][table.mirrorEffect];
     }
 };
+
+function isTheOppositeDirection(keyCode){
+    return (snake.direction === directions[keyCode][!table.mirrorEffect]);
+}
 
 function calculateDirection(cell) {
     var neighbourCells = [
@@ -202,7 +231,7 @@ function drawSnake() {
 }
 
 function initSnake() {
-    snake.cells = [CONSTANTS.SNAKE_START];
+    snake.cells = [{x: 0, y: 0}];
     var head = snake.cells[snake.cells.length - 1];
     getColumn(head.x, head.y).innerHTML = '<img src="images/head_' + snake.direction + '.png" class="snake-body">';
 }
@@ -249,8 +278,8 @@ function getScroll() {
 
 function removeScrollEffects() {
     table.mirrorEffect = false;
-    if (game.runnningInterval !== CONSTANTS.DEFAULT_GAME.runnningInterval) {
-        game.runnningInterval = CONSTANTS.DEFAULT_GAME.runnningInterval;
+    if (game.runnningInterval !== 400) {
+        game.runnningInterval = 400;
         pauseGame();
         startGame();
     }
@@ -270,7 +299,6 @@ function placeScroll() {
     table.scrollOnTable.position = coord;
     table.scrollOnTable.type = scrolls[type];
     getColumn(coord.x, coord.y).innerHTML = '<img src="images/' + type + '.png" class="sm-img">';
-
 }
 
 function clearTable() {
@@ -278,15 +306,42 @@ function clearTable() {
 }
 
 function resetData() {
-    $('#n').value = CONSTANTS.DEFAULT_COL_COUNT;
-    $('#m').value = CONSTANTS.DEFAULT_ROW_COUNT;
-    $('#k').value = CONSTANTS.DEFAULT_OBS_COUNT;
-    game = CONSTANTS.DEFAULT_GAME;
-    table = CONSTANTS.DEFAULT_TABLE;
-    snake = CONSTANTS.DEFAULT_SNAKE;
+    $('#n').value = 10;
+    $('#m').value = 10;
+    $('#k').value = 2;
+    //game = CONSTANTS.DEFAULT_GAME;
+    //table = CONSTANTS.DEFAULT_TABLE;
+    //snake = CONSTANTS.DEFAULT_SNAKE;
+
+    game = {
+        running: null,
+        score: 1,
+        runnningInterval: 400,
+        initialized: false
+    };
+
+    table = {
+        scrollOnTable: {
+            type: null,
+            position: null
+        },
+        obstacles: [],
+        mirrorEffect: false,
+        reverseEffect: false
+    };
+
+    snake = {
+        direction: 0,
+        cells: [],
+        extending: 0
+    };
+
+
     updateScoreLabel();
     clearTable();
     hideMyModal();
+    $('#scroll').innerHTML = 'Aktív tekercs: nincs';
+    game.initialized = false;
 }
 
 function gameOver() {
@@ -295,24 +350,27 @@ function gameOver() {
 }
 
 function startGame() {
+    if (!game.initialized) {
+        return;
+    }
     if (!game.running) {
-        console.log("startGame");
         game.running = setInterval(moveSnake, game.runnningInterval);
     }
 }
 
 function pauseGame() {
+    if (!game.initialized) {
+        return;
+    }
     if (game.running) {
-        console.log("pauseGame");
         clearInterval(game.running);
         game.running = null;
     }
 }
 
 function resetRunningInterval() {
-    console.log("resetRunningInterval");
-    game.runnningInterval = CONSTANTS.DEFAULT_GAME.runnningInterval;
     pauseGame();
+    game.runnningInterval = 400;
     startGame();
 }
 
@@ -346,6 +404,7 @@ function generateTable() {
         placeScroll();
         updateScoreLabel();
         //enableButtons();
+        game.initialized = true;
     }
 }
 
