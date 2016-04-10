@@ -58,7 +58,6 @@ var formData = {
     obsCount: null
 };
 
-
 /*
  0 -> jobbra
  1 -> fel
@@ -92,11 +91,11 @@ var scrolls = {
     reverse: {//zöld
         name: 'Fordítás tekercse',
         execute: function () {
-            pauseGame();
-            snake.cells.reverse();
-            calculateDirection(snake.cells[snake.cells.length - 1]);
-            table.reverseEffect = true;
-            startGame();
+            /*pauseGame();
+             snake.cells.reverse();
+             calculateDirection(snake.cells[snake.cells.length - 1]);
+             table.reverseEffect = true;
+             startGame();*/
             $('#scroll').innerHTML = 'Aktív tekercs: ' + this.name + ' (nem működik)';
         },
         hasEffect: false
@@ -154,16 +153,14 @@ var directions = {
 document.onkeydown = function (e) {
     if (directions.keyCodes.indexOf(e.keyCode) !== -1) {
         e.preventDefault();
-        
-        if(isTheOppositeDirection(e.keyCode) && snake.cells.length > 1){
+        if (isTheOppositeDirection(e.keyCode) && snake.cells.length > 1) {
             return;
         }
-        
         snake.direction = directions[e.keyCode][table.mirrorEffect];
     }
 };
 
-function isTheOppositeDirection(keyCode){
+function isTheOppositeDirection(keyCode) {
     return (snake.direction === directions[keyCode][!table.mirrorEffect]);
 }
 
@@ -188,6 +185,8 @@ function init() {
     $('#pauseGame').addEventListener('click', pauseGame, false);
     $('#generateButton').addEventListener('click', generateTable, false);
     $('#newGame').addEventListener('click', resetData, false);
+    $('#toggleHelpButton').addEventListener('click', toggleHelp, false);
+    $('#toggleIssuesButton').addEventListener('click', toggleIssues, false);
 }
 
 function getRandomCell() {
@@ -267,13 +266,7 @@ function getScroll() {
         return 'lazy';
     } else {
         return 'voracious';
-    }/*
-     if (first) {
-     first = false;
-     return 'wisdom';
-     } else {
-     return 'reverse';
-     }*/
+    }
 }
 
 function removeScrollEffects() {
@@ -283,7 +276,6 @@ function removeScrollEffects() {
         pauseGame();
         startGame();
     }
-
 }
 
 function removeScroll() {
@@ -336,7 +328,6 @@ function resetData() {
         extending: 0
     };
 
-
     updateScoreLabel();
     clearTable();
     hideMyModal();
@@ -371,6 +362,7 @@ function pauseGame() {
 function resetRunningInterval() {
     pauseGame();
     game.runnningInterval = 400;
+    $('#scroll').innerHTML = 'Aktív tekercs: nincs';
     startGame();
 }
 
@@ -389,7 +381,6 @@ function updateScoreLabel() {
  }
  */
 function generateTable() {
-
     if (!game.running) {
         formData.colCount = $('#n').value;
         formData.rowCount = $('#m').value;
@@ -505,3 +496,27 @@ Array.prototype.indexOfObject = function (obj) {
     }
     return index;
 };
+
+var helpShowed = false;
+
+function toggleHelp() {
+    var panel = $('#helpPanel');
+    if (helpShowed) {
+        panel.classList.add('hidden');
+    } else {
+        panel.classList.remove('hidden');
+    }
+    helpShowed = !helpShowed;
+}
+
+var issueShowed = false;
+
+function toggleIssues() {
+    var panel = $('#issuePanel');
+    if (helpShowed) {
+        panel.classList.add('hidden');
+    } else {
+        panel.classList.remove('hidden');
+    }
+    helpShowed = !helpShowed;
+}

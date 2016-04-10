@@ -21,13 +21,36 @@
         <div class="container">
             <div class="well">
                 <h1>Beadandó - Webfejlesztés 2.</h1>
-                <h2>Help</h2>
-                <p class="text-info">Bölcsesség tekercse (kék): a sárkány 4 egységgel növekszik tőle.</p>
-                <p class="text-info">Tükrök tekercse (szürke): az irányítás tükörképben történik irányonként (fel helyett le, bal helyett jobb).</p>
-                <p class="text-info">Fordítás tekercse (zöld): a sárkány haladási iránya megfordul (feje és farka helyett cserél). - Helytelen működés!</p>
-                <p class="text-info">Mohóság tekercse (lila): a sárkány haladási sebessége másfélszeresére nő 5 másodpercig.</p>
-                <p class="text-info">Lustaság tekercse (sárga): a sárkány haladási sebessége másfélszeresére csökken 5 másodpercig.</p>
-                <p class="text-info">Falánkság tekercse (piros): a sárkány 10 egységgel növekszik tőle.</p>
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-md-6"><h6>Help</h6></div>
+                            <div class="col-md-6"><button class="btn btn-sm pull-right" id="toggleHelpButton">Mutasd</button></div>
+                        </div>
+                    </div>
+                    <div class="panel-body hidden" id="helpPanel">
+                        Bölcsesség tekercse (kék): a sárkány 4 egységgel növekszik tőle.<br>
+                        Tükrök tekercse (szürke): az irányítás tükörképben történik irányonként (fel helyett le, bal helyett jobb).<br>
+                        Fordítás tekercse (zöld): a sárkány haladási iránya megfordul (feje és farka helyett cserél). - Nem működik!<br>
+                        Mohóság tekercse (lila): a sárkány haladási sebessége másfélszeresére nő 5 másodpercig.<br>
+                        Lustaság tekercse (sárga): a sárkány haladási sebessége másfélszeresére csökken 5 másodpercig.<br>
+                        Falánkság tekercse (piros): a sárkány 10 egységgel növekszik tőle.
+                    </div>
+                </div>
+
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-md-6"><h6>Ismert Hibák</h6></div>
+                            <div class="col-md-6"><button class="btn btn-sm pull-right" id="toggleIssuesButton">Mutasd</button></div>
+                        </div>
+                    </div>
+                    <div class="panel-body hidden" id="issuePanel">
+                        Ha egy mozgási intervallumon belül változtatjuk a srákány irányát, akkor képes önmagába fordulni.<br>
+                        Sajnos erre nem találtam megoldást.
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label for="n">Szélesség:</label>
                     <input type="number" class="form-control input-sm" id="n" min="3" value="10">
@@ -51,9 +74,7 @@
 
                     </table>
                 </div>
-
             </div>
-
         </div>
 
         <div id="myModal" class="my-modal">
